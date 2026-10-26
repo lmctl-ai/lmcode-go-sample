@@ -1,0 +1,54 @@
+name: Go sample integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      compiler:
+        description: Published lmscript version to check
+        default: '0.2.420'
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-24.04, label: linux-x64}
+          - {os: macos-15, label: macos}
+          - {os: windows-2022, label: windows-x64}
+    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.label }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.26.3'
+          cache: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install compiler and Windows Python alias
+        env:
+          LMSCRIPT_VERSION: ${{ inputs.compiler || '0.2.420' }}
+        run: |
+          npm install --global "@lmctl-ai/lmctl@$LMSCRIPT_VERSION"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            mkdir -p .ci-bin
+            printf '#!/usr/bin/env bash\nexec python "$@"\n' > .ci-bin/python3
+            chmod +x .ci-bin/python3
+            echo "$PWD/.ci-bin" >> "$GITHUB_PATH"
+          fi
+      - name: Build static host and run the canonical suite
+        run: ./test.sh
