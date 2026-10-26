@@ -8,7 +8,7 @@ on:
     inputs:
       compiler:
         description: Published lmscript version to check
-        default: '0.2.420'
+        default: '0.2.426'
         type: string
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
           node-version: '24'
       - name: Install compiler and Windows Python alias
         env:
-          LMSCRIPT_VERSION: ${{ inputs.compiler || '0.2.420' }}
+          LMSCRIPT_VERSION: ${{ inputs.compiler || '0.2.426' }}
         run: |
           npm install --global "@lmctl-ai/lmctl@$LMSCRIPT_VERSION"
           if [[ "$RUNNER_OS" == Windows ]]; then
