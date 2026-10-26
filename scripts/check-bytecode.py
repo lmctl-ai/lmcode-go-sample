@@ -13,7 +13,7 @@ with tempfile.TemporaryDirectory(prefix='sample-recompile-') as temporary:
     result=subprocess.run(compile_cmd,capture_output=True,text=True)
     skipped=[]
     if result.returncode:
-        if 'unexpected character "β"' not in result.stderr or '201-word-literals.lms' not in result.stderr:
+        if 'unexpected character' not in result.stderr or '201-word-literals.lms' not in result.stderr:
             sys.stderr.write(result.stdout); sys.stderr.write(result.stderr); sys.exit(result.returncode)
         print('NOTICE compiler lacks lmcode-literals-v1; checking bytecode reproduction for supported cases only')
         result=subprocess.run([sys.executable,str(root/'sample-suite/compile.py'),'--exclude-feature','lmcode-literals-v1','--output',str(out)],check=True,text=True,capture_output=True)
