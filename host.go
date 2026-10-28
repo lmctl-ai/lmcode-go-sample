@@ -47,6 +47,14 @@ func (h *Host) newMoney(cents int64) lmcode.Value {
 	return lmcode.Object("Money", item)
 }
 
+func (h *Host) totalHandle(shop *Shop) lmcode.Value {
+	var total int64
+	for _, item := range shop.Items.Values {
+		total = wrapAdd(total, item.Cents)
+	}
+	return h.newMoney(total)
+}
+
 func moneyHandle(value any) (*Money, error) {
 	money, ok := value.(*Money)
 	if !ok || money == nil {
@@ -305,11 +313,7 @@ func (h *Host) registerShop() {
 		return lmcode.Object("Items", self.(*Shop).Items), nil
 	}))
 	mustRegister(r.Method("Shop", "total", nil, "Money", func(self any, _ []lmcode.Value) (lmcode.Value, error) {
-		var total int64
-		for _, item := range self.(*Shop).Items.Values {
-			total = wrapAdd(total, item.Cents)
-		}
-		return h.newMoney(total), nil
+		return h.totalHandle(self.(*Shop)), nil
 	}))
 	mustRegister(r.Method("Shop", "price", []string{"int"}, "Money", func(_ any, a []lmcode.Value) (lmcode.Value, error) {
 		return h.newMoney(a[0].Int), nil

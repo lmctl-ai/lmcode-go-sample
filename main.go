@@ -81,11 +81,47 @@ func run(args []string) int {
 	if err := program.Run(context, host.Registry); err != nil {
 		return lmcode.ReportError("run", err)
 	}
+	entries := program.Entries()
+	entriesCalled := 0
+	callEntry := func(index int, argument lmcode.Value) error {
+		value, err := program.Call(index, context, host.Registry, []lmcode.Value{argument})
+		if err != nil {
+			return err
+		}
+		entriesCalled++
+		if value.Kind != lmcode.KindVoid {
+			text := value.Str
+			switch value.Kind {
+			case lmcode.KindInt:
+				text = fmt.Sprintf("%d", value.Int)
+			case lmcode.KindFloat:
+				text = lmcode.FormatG15(value.Float)
+			case lmcode.KindBool:
+				text = fmt.Sprint(value.Bool)
+			}
+			fmt.Printf("entry %s = %s\n", entries[index].Name, text)
+		}
+		return nil
+	}
+	for index, entry := range entries {
+		switch entry.Annotation {
+		case "item":
+			for _, item := range host.Shop.Items.Values {
+				if err := callEntry(index, lmcode.Object("Money", item)); err != nil {
+					return lmcode.ReportError("run", err)
+				}
+			}
+		case "total":
+			if err := callEntry(index, host.totalHandle(host.Shop)); err != nil {
+				return lmcode.ReportError("run", err)
+			}
+		}
+	}
 	if host.Ledger.Balance < 0 {
 		return lmcode.ReportAppFailure("ledger: negative balance")
 	}
-	result := fmt.Sprintf("{\"balance\": %d, \"entries\": %d, \"note\": %s}",
-		host.Ledger.Balance, host.Ledger.Entries, lmcode.JSONEscape(host.Ledger.Note))
+	result := fmt.Sprintf("{\"balance\": %d, \"entries\": %d, \"note\": %s, \"entries_called\": %d}",
+		host.Ledger.Balance, host.Ledger.Entries, lmcode.JSONEscape(host.Ledger.Note), entriesCalled)
 	return lmcode.ReportOK(result)
 }
 
