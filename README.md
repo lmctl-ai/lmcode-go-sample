@@ -7,8 +7,7 @@ callbacks, then [main.go](main.go) for the CLI protocol. It uses the public
 schema bytes from the pinned suite.
 
 ```sh
-npm install --global @lmctl-ai/lmctl@0.2.426
-./test.sh
+LMSCRIPT_BIN=/path/to/rule-method-capable/lmscript ./test.sh
 ```
 
 ## Write a host in ten steps
