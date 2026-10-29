@@ -7,7 +7,8 @@ callbacks, then [main.go](main.go) for the CLI protocol. It uses the public
 schema bytes from the pinned suite.
 
 ```sh
-LMSCRIPT_BIN=/path/to/rule-method-capable/lmscript ./test.sh
+npm install -g @lmctl-ai/lmctl
+lmscript test.lms
 ```
 
 ## Write a host in ten steps
@@ -105,30 +106,10 @@ CGO_ENABLED=0 go build -trimpath -o build/lmcode-go-sample .
 ./test.sh
 ```
 
-CI runs Linux, macOS, and Windows. Its manual workflow requires a published
-v6/R49-capable compiler version input. Locally, use
-`LMSCRIPT_BIN=/path/to/current/lmscript LMCODE_REQUIRE_LITERAL_COMPILER=1 ./test.sh`
-to reproduce all 94 pinned programs. The runtime binary itself is pure Go and
-built with `CGO_ENABLED=0`.
+## lmscript tests and automatic releases
 
-## Rule entries (R47/R48/R49, DSLB v6)
+Install Go 1.26, Node 24 and `npm install -g @lmctl-ai/lmctl`. From this repository run `lmscript test.lms` or `lmctl test.lms`; test.sh forwards to lmscript.
 
-The suite is pinned to `lmcode-cpp` d608ba2. Go's SDK pin is the module dependency
-in `go.mod`/`go.sum` (runtime d2d847e), rather than a separate sdk.lock or vendored
-SDK sync script. After the body, the host enumerates entries in source order:
-`@item` calls once per original Money handle in item order, `@total` calls once
-with the current Shop.total() handle, and other annotations are ignored.
-Returned values print `entry NAME = VALUE`. Call failures are run-phase errors.
-The final result appends `entries_called`, separate from ledger `entries`.
-Cases 068 and 069 call seven and four entries respectively; 093 refuses v5.
+Every main push builds with CGO_ENABLED=0 and tests on Linux x64/arm64, macOS x64/arm64 and Windows x64, then publishes native executables, licenses and SHA256SUMS. Pull requests run the same checks without publishing.
 
-Use a v6 compiler (mono main 56f19153 or the supplied build below). The supplied
-read-only checkout was observed at 0e621804; 56f19153 changes only the conformance
-generator, and this build reproduces all 94 sample files. Verification uses:
-
-```sh
-LMSCRIPT_BIN=/home/mma/repos/lmctl-mono-v6entries/lmscript/bin/lmscript LMSCRIPT_MIN=0 ./test.sh
-```
-
-The numeric source package version is not a language capability check. No CI
-dispatch or release is part of this migration.
+`examples/rule-entries.lms` demonstrates annotated functions implementing Adjuster. After running the body the host calls @item once per original item and @total for the total, ignoring other annotations. Case 069 covers returned values. The lmscript driver audits all 181 standard and 45 host signatures, runs all 94 cases with exact bytes/exits, reproduces bytecode and checks nine negative runner controls plus the annotated example. Python only verifies/synchronizes suite locks; Node provides binary/process adapters. The SDK remains pinned by go.mod/go.sum.

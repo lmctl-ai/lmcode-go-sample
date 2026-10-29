@@ -1,0 +1,31 @@
+# Run from this repository: lmctl test.lms or lmscript test.lms.
+import "./sample-suite/runner-lib.lms";
+root = suite_root();
+fn step(command) {
+  result = invoke(suite_root(), command, [], {}, 600000);
+  if (result.stdout != "") { print(result.stdout); }
+  if (result.stderr != "") { print(result.stderr); }
+  assert(result.code == 0 && result.error == "", "test step failed: " + json_stringify(command) + " " + result.error);
+}
+python = "python3";
+if (env("RUNNER_OS") == "Windows") { python = "python"; }
+step([python, "-B", "scripts/sync-suite.py", "--check"]);
+step(["go", "mod", "verify"]);
+set_env("CGO_ENABLED", "0");
+mkdir("build");
+host = path_join(Directory, "build/lmcode-go-sample");
+if (env("RUNNER_OS") == "Windows") { host = host + ".exe"; }
+version = env("SAMPLE_VERSION") || "0.4.0";
+step(["go", "build", "-trimpath", "-ldflags=-buildid= -X main.version=" + version, "-o", host, "."]);
+sdk = invoke(root, ["go", "list", "-m", "-f", "{{.Dir}}", "github.com/lmctl-ai/lmcode-go"], [], {}, 30000);
+assert(sdk.code == 0, "cannot locate pinned SDK");
+std = path_join(trim(sdk.stdout), "std/lmcode-std.schema.json");
+step(concat(compiler_command(), ["--no-preflight", "sample-suite/audit.lms", "--std", std]));
+step(concat(compiler_command(), ["--no-preflight", "sample-suite/run-suite.lms", host]));
+step(concat(compiler_command(), ["--no-preflight", "sample-suite/check-recompile.lms"]));
+step(concat(compiler_command(), ["--no-preflight", "sample-suite/test-runner.lms"]));
+step(concat(compiler_command(), ["--no-preflight", "examples/rule-entries.lms", path_join(Directory, "build/rule-entries.dslb")]));
+result = invoke(root, [host], ["--dsl", path_join(Directory, "build/rule-entries.dslb")], {}, 30000);
+expected = binary(root, {op:"hex", path:path_join(root, "expected/068-rule-entries.out")});
+assert(result.code == 0 && result.hex == expected && result.stderr_hex == "", "annotated interface example differs");
+println("PASS annotated interface example");

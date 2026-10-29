@@ -14,6 +14,8 @@ import (
 //go:embed sample-suite/sample.dsl.json
 var schemaBytes embed.FS
 
+var version = "0.4.0"
+
 const usage = "usage: --version | --dsl-schema [--json] | --dsl-signatures | --dsl FILE"
 
 func cliUsage() int {
@@ -40,7 +42,7 @@ func run(args []string) int {
 	host := NewHost()
 
 	if len(args) == 1 && args[0] == "--version" {
-		fmt.Println("lmcode-go-sample 0.1.0")
+		fmt.Println("lmcode-go-sample " + version)
 		return 0
 	}
 	if len(args) == 1 && args[0] == "--dsl-schema" ||
