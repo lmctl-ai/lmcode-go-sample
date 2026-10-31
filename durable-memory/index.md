@@ -2,8 +2,8 @@
 
 ## Pins
 
-Suite: lmcode-cpp 249af7744ab95caa20094493a2934a3916f46956 (123 cases;
-its sample-suite bytes match slice-6 commit 6ee3d62).
+Suite: lmcode-cpp 46ede7f716d72a535d5f6fc63df8297d8079ba11 (123 cases). Source, bytecode and
+oracle bytes match the full-gate 249af77 pin; terminology docs are canonical.
 SDK: lmcode-go 6fd8391ee4dd, pinned by go.mod/go.sum as
 v0.6.39-0.20261031051649-6fd8391ee4dd. There is no separate SDK sync script or sdk.lock.
 Compiler qualification: private mono main build 177e38ca. npm 0.2.448 lacks out=.
