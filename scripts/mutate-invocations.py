@@ -21,6 +21,8 @@ with tempfile.TemporaryDirectory(prefix=f"{LANG}-sample-invocation-mutants-") as
     original = source.read_text()
     env = os.environ.copy()
     host = work / ("target/release/lmcode-rust-sample" if LANG == "rust" else "build/lmcode-go-sample")
+    if LANG == "go" and os.name == "nt":
+        host = host.with_suffix(".exe")
 
     def build():
         if LANG == "rust":
