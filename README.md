@@ -22,7 +22,7 @@ Run `./test.sh` with that compiler. No global install is required.
    [CONTRACT.md](sample-suite/CONTRACT.md).
 2. **Declare the API.** [host.schema.json](sample-suite/host.schema.json) gives
    contexts, object types, overloads, operators, an enum, and return-self
-   methods. [sample.dsl.json](sample-suite/sample.dsl.json) adds the standard
+   methods. [`sample.dsl.json`](sample-suite/sample.dsl.json) adds the standard
    catalog used by the compiler.
 3. **Pin the shared corpus.** [suite.lock](suite.lock) hashes every vendored
    file. [scripts/sync-suite.sh](scripts/sync-suite.sh) copies only from a clean,
