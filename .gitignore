@@ -1,1 +1,5 @@
 /build/
+
+# Local Python oracle caches are not canonical suite inputs.
+__pycache__/
+*.pyc
