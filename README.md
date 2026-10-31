@@ -164,6 +164,8 @@ the sink inside entry dispatch must fail canonical payload expectations. A compi
 failure, stderr or wrong exit is not accepted as a caught mutant. See
 [durable notes](durable-memory/index.md) for ownership and pin discipline.
 
+The host loads lmcode bytecode (DSLB v6).
+
 ## Historical literal names
 
 The documentation calls the language lmcode. `--dsl`, `--dsl-schema` and `--dsl-signatures` are current host flag literals; `DSLB` is the bytecode magic and `DSLB v6` is the current format name; `.dslb` is the current bytecode filename extension. Other code-formatted API names, paths, manifest names and diagnostic text retain their current literal spellings.
