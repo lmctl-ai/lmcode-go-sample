@@ -1,2 +1,4 @@
 github.com/lmctl-ai/lmcode-go v0.6.39-0.20261031185520-4b8b70d7e9f8 h1:uEiM+nqrXe1XuIaV3RTydFllRhdZbrwWj99tju4wPKo=
 github.com/lmctl-ai/lmcode-go v0.6.39-0.20261031185520-4b8b70d7e9f8/go.mod h1:Wfm1dj/9Uek4C4Y6LOkL5kFNRojgFUej7DDRGStSfVc=
+github.com/lmctl-ai/lmcode-go v0.6.39-0.20261031214422-a63f5168ee6c h1:sNxxeIFogM+rcIEjdqQzZmzYpXilqnJRA2qMvOkADZ4=
+github.com/lmctl-ai/lmcode-go v0.6.39-0.20261031214422-a63f5168ee6c/go.mod h1:Wfm1dj/9Uek4C4Y6LOkL5kFNRojgFUej7DDRGStSfVc=

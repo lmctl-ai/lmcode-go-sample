@@ -43,7 +43,6 @@ func normalizedLoadError(err error) error {
 }
 
 func run(args []string) int {
-	host := NewHost()
 	if len(args) == 1 && args[0] == "--version" {
 		fmt.Println("lmcode-go-sample " + version)
 		return 0
@@ -57,6 +56,7 @@ func run(args []string) int {
 		return 0
 	}
 	if len(args) == 1 && args[0] == "--lmcode-signatures" {
+		host := NewHost(false)
 		for _, signature := range host.Registry.Signatures() {
 			fmt.Fprintln(os.Stdout, signature)
 		}
@@ -89,6 +89,9 @@ func run(args []string) int {
 	if err != nil {
 		return cliFailure(err)
 	}
+	// Parse invocation mode before host setup so dry runs never seed live
+	// inventory or acquire resources during initialization.
+	host := NewHost(results.Dry())
 	schema, err := schemaBytes.ReadFile("sample-suite/sample.dsl.json")
 	if err != nil {
 		return lmcode.FailureFrame(os.Stdout, "load", lmcode.NewError(lmcode.LOAD_BAD_BYTECODE, "cannot read sample schema"))
@@ -98,6 +101,7 @@ func run(args []string) int {
 		return lmcode.FailureFrame(os.Stdout, "load", err)
 	}
 	context := lmcode.NewContext()
+	context.SetDry(results.Dry())
 	context.Set("shop", host.Shop)
 	context.Set("ledger", host.Ledger)
 	entriesCalled := 0

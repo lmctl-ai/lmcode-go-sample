@@ -73,7 +73,7 @@ func (h *Host) units(amount float64) (lmcode.Value, error) {
 	return h.newMoney(int64(cents)), nil
 }
 
-func NewHost() *Host {
+func NewHost(dry bool) *Host {
 	h := &Host{
 		Registry: lmcode.NewRegistry(), // Default registry installs string/math/collection/file std.
 		Shop:     &Shop{Items: &Items{}},
@@ -85,7 +85,9 @@ func NewHost() *Host {
 	h.registerConversions()
 	mustRegister(lmcode.RegisterTesting(h.Registry, os.Stdout)) // Explicitly opt into print/assert_close.
 	for _, cents := range []int64{125, 250, 375} {
-		h.Shop.Items.Values = append(h.Shop.Items.Values, h.newMoney(cents).Obj.(*Money))
+		if !dry {
+			h.Shop.Items.Values = append(h.Shop.Items.Values, h.newMoney(cents).Obj.(*Money))
+		}
 	}
 	return h
 }
@@ -230,13 +232,14 @@ func (h *Host) registerShop() {
 	mustRegister(r.Function("fee", []string{"int"}, "int", func(a []lmcode.Value) (lmcode.Value, error) {
 		return lmcode.Int(wrapAdd(a[0].Int, 5)), nil
 	}))
-	mustRegister(r.Function("sample_tmp", nil, "string", func([]lmcode.Value) (lmcode.Value, error) {
+	sampleTmp := lmcode.Function(func([]lmcode.Value) (lmcode.Value, error) {
 		path, ok := os.LookupEnv("SAMPLE_TMP")
 		if !ok || path == "" {
 			return lmcode.None(), lmcode.NewHostError("SAMPLE_TMP is required")
 		}
 		return lmcode.String(path), nil
-	}))
+	})
+	mustRegister(r.Function("sample_tmp", nil, "string", sampleTmp, lmcode.Dry(sampleTmp)))
 
 	// A schema enum crosses the native boundary as its string value.
 	mustRegister(r.Method("Money", "amount", nil, "int", func(self any, _ []lmcode.Value) (lmcode.Value, error) {
