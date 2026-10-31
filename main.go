@@ -77,6 +77,11 @@ func run(args []string) int {
 		return lmcode.ReportError("load", normalizedLoadError(err))
 	}
 
+	// The sink belongs to this invocation, not to a body/entry collection arena.
+	var sink lmcode.ResultSink
+	if err := host.Registry.SetResultSink(&sink); err != nil {
+		return lmcode.ReportError("run", err)
+	}
 	context := lmcode.NewContext()
 	context.Set("shop", host.Shop)
 	context.Set("ledger", host.Ledger)
@@ -124,7 +129,14 @@ func run(args []string) int {
 	}
 	result := fmt.Sprintf("{\"balance\": %d, \"entries\": %d, \"note\": %s, \"entries_called\": %d}",
 		host.Ledger.Balance, host.Ledger.Entries, lmcode.JSONEscape(host.Ledger.Note), entriesCalled)
-	return lmcode.ReportOK(result)
+	if code := lmcode.ReportOK(result); code != 0 {
+		return code
+	}
+	// Every error path above returns before the terminal success frame.
+	if err := lmcode.WriteResultFrame(os.Stdout, &sink); err != nil {
+		return lmcode.ReportAppFailure("cannot write sample result")
+	}
+	return 0
 }
 
 func main() { os.Exit(run(os.Args[1:])) }

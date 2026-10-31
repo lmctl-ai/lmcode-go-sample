@@ -1,7 +1,34 @@
-# Go sample notes
+# Go sample — return-frame adoption
 
-Start with README.md, main.go and host.go. go.mod/go.sum pin the public SDK module; suite.lock pins the unchanged canonical lmcode-cpp corpus.
+## Pins
 
-Root test.lms drives module and suite integrity checks, a CGO-disabled build, signature audits, 94 exact runtime cases, bytecode reproduction, runner controls and the annotated interface example. Install Go 1.26 and npm @lmctl-ai/lmctl. Both lmctl test.lms and lmscript test.lms work from this repository.
+Suite: lmcode-cpp 249af7744ab95caa20094493a2934a3916f46956 (123 cases;
+its sample-suite bytes match slice-6 commit 6ee3d62).
+SDK: lmcode-go 6fd8391ee4dd, pinned by go.mod/go.sum as
+v0.6.39-0.20261031051649-6fd8391ee4dd. There is no separate SDK sync script or sdk.lock.
+Compiler qualification: private mono main build 177e38ca. npm 0.2.448 lacks out=.
 
-Actions validates Linux x64/arm64, macOS x64/arm64 and Windows x64 on pushes/PRs. Main publishes tested native binaries, licenses and SHA256SUMS after all jobs succeed. SAMPLE_VERSION sets the embedded --version value via Go linker flags. Python only maintains the canonical suite lock; Node adapts binary files/processes for lmscript tests.
+## Ownership and protocol
+
+main.go creates one ResultSink and binds it through Registry.SetResultSink
+before Program.Run. Keep that sink through the item/total entry calls; do not
+reset it inside callEntry. After application validation, ReportOK preserves the
+shop diagnostic and WriteResultFrame emits the final payload. Errors return
+before framing. Case 364 verifies body/entry ownership; 365–368 frame no failures.
+
+## Gates
+
+./test.sh uses LMSCRIPT_BIN, verifies the canonical lock and Go module, audits
+206 std/45 host imports, runs 123 exact cases and reproduces their bytecode,
+exercises runner controls and both local examples. Shared frame oracles and
+compiled missing-frame/reset-between-entries controls run in the same gate.
+Canonical expectations are never recorded from this port. Keep suite updates
+in lmcode-cpp and sync committed bytes with scripts/sync-suite.py.
+
+## Platform and CI
+
+Local qualification is Linux x86_64 with CGO_ENABLED=0. The existing Actions
+platform matrix and automatic release policy are unchanged. Its npm compiler
+default requires a compatible publication before the new corpus can pass there;
+do not invent a future package version. SAMPLE_VERSION remains the linker-set
+version label, independent of the invocation return value.
