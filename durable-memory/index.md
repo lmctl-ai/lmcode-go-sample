@@ -2,8 +2,9 @@
 
 ## Pins
 
-Suite: lmcode-cpp 46ede7f716d72a535d5f6fc63df8297d8079ba11 (123 cases). Source, bytecode and
-oracle bytes match the full-gate 249af77 pin; terminology docs are canonical.
+Suite: suite.lock is authoritative for the reviewed canonical commit and file
+hashes (123 cases). Source, bytecode and oracle bytes retain the full-gate
+qualification; documentation-only upstream updates are recorded by the lock.
 SDK: lmcode-go 6fd8391ee4dd, pinned by go.mod/go.sum as
 v0.6.39-0.20261031051649-6fd8391ee4dd. There is no separate SDK sync script or sdk.lock.
 Compiler qualification: private mono main build 177e38ca. npm 0.2.448 lacks out=.
