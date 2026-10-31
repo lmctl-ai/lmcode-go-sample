@@ -29,19 +29,19 @@ Run `./test.sh` with that compiler. No global install is required.
    reviewed commit of the canonical `lmcode-cpp` suite; the corpus remains
    canonical there, never in this sample.
 4. **Own host objects.** [Host](host.go) retains every `*Money` it returns so a
-   DSL handle stays valid for the process lifetime. `Items.at()` returns the
+   lmcode handle stays valid for the process lifetime. `Items.at()` returns the
    pointer already stored in the shop, preserving identity.
 5. **Register contexts and typed callbacks.** `Registry.Context`, `Function`,
    and `Method` declare the host surface with schema type names. Parameter
    tuples distinguish overloads, and callbacks return tagged `lmcode.Value`s.
-6. **Map DSL operations explicitly.** `Money` operators call `plus`, `minus`,
+6. **Map lmcode operations explicitly.** `Money` operators call `plus`, `minus`,
    `times`, and `neg`; `money(int)` means cents while `money(float)` means
    currency units. Signed integer money arithmetic wraps modulo 2^64.
 7. **Use standard libraries deliberately.** `lmcode.NewRegistry()` installs
    string, math, file, collection, container, and JSON functions. The host separately calls
    `lmcode.RegisterTesting` to opt into `print` and `assert_close`. Collection
    handles created by std functions are owned by the registry for one run.
-8. **Load bytecode, not DSL source.** The compiler builds `.dslb`; [main.go](main.go)
+8. **Load bytecode, not lmcode source.** The compiler builds `.dslb`; [main.go](main.go)
    loads it against the embedded, exact schema bytes with `lmcode.Load`, then
    runs it with a `Context` holding the live shop and ledger.
 9. **Keep the CLI protocol deterministic.** Discovery flags write the embedded
@@ -65,7 +65,7 @@ Run `./test.sh` with that compiler. No global install is required.
 | standard collection | `*stdlib.StrList`, `*stdlib.IntList`, `*stdlib.FloatList`, `*stdlib.StrMap`, typed maps, stacks, queues, PQs, `*stdlib.JSON` | Read snapshots with `Values()`/`Entries()`; std handles live in the registry arena for one `Program.Run`. |
 | enum | string | Return the declared value, for example `"USD"` for `Currency.USD`. |
 | `void` | `lmcode.None()` | Host callbacks return `None` with no error. |
-| host error | `*lmcode.Error` | Use `lmcode.NewHostError`; the VM adds the DSL source location. |
+| host error | `*lmcode.Error` | Use `lmcode.NewHostError`; the VM adds the lmcode source location. |
 | JSON string | `lmcode.JSONEscape` | Escapes a byte string for the result line without adding machine-specific paths. |
 
 Go strings preserve arbitrary bytes, including NUL and invalid UTF-8. A Go
@@ -163,3 +163,7 @@ host faults from `scripts/test-return-controls.py`. Removing the frame or resett
 the sink inside entry dispatch must fail canonical payload expectations. A compile
 failure, stderr or wrong exit is not accepted as a caught mutant. See
 [durable notes](durable-memory/index.md) for ownership and pin discipline.
+
+## Historical literal names
+
+The documentation calls the language lmcode. `--dsl`, `--dsl-schema` and `--dsl-signatures` are current host flag literals; `DSLB` is the bytecode magic and `DSLB v6` is the current format name; `.dslb` is the current bytecode filename extension. Other code-formatted API names, paths, manifest names and diagnostic text retain their current literal spellings.
