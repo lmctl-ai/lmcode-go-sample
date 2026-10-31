@@ -32,7 +32,7 @@ for name, changed, target in variants:
         subprocess.run(['go', 'build', '-mod=readonly', '-trimpath', '-o', str(binary), '.'], cwd=root, env=dict(os.environ, CGO_ENABLED='0', GOWORK='off'), check=True, capture_output=True)
         for case_name in ([target] if target else ['001-literals', '364-return-entry-lifetime']):
             case = cases[case_name]
-            result = subprocess.run([str(binary), '--dsl', str(SUITE / case['bytecode'])], cwd=root, env=dict(os.environ, SAMPLE_TMP=temp), capture_output=True)
+            result = subprocess.run([str(binary), '--lmcode', str(SUITE / case['bytecode'])], cwd=root, env=dict(os.environ, SAMPLE_TMP=temp), capture_output=True)
             assert result.returncode == 0 and result.stderr == b'', (name, result.returncode, result.stderr)
             try:
                 validate(result.stdout, result.returncode, case.get('expected_return'))

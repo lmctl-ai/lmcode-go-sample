@@ -16,7 +16,7 @@ var schemaBytes embed.FS
 
 var version = "0.4.0"
 
-const usage = "usage: --version | --dsl-schema [--json] | --dsl-signatures | --dsl FILE"
+const usage = "usage: --version | --lmcode-schema [--json] | --lmcode-signatures | --lmcode FILE"
 
 func cliUsage() int {
 	fmt.Printf("{\"ok\": false, \"phase\": \"cli\", \"code\": \"CLI_USAGE\", \"message\": %s}\n", lmcode.JSONEscape(usage))
@@ -45,8 +45,8 @@ func run(args []string) int {
 		fmt.Println("lmcode-go-sample " + version)
 		return 0
 	}
-	if len(args) == 1 && args[0] == "--dsl-schema" ||
-		len(args) == 2 && args[0] == "--dsl-schema" && args[1] == "--json" {
+	if len(args) == 1 && args[0] == "--lmcode-schema" ||
+		len(args) == 2 && args[0] == "--lmcode-schema" && args[1] == "--json" {
 		data, err := schemaBytes.ReadFile("sample-suite/sample.dsl.json")
 		if err != nil {
 			return lmcode.ReportAppFailure("cannot read sample schema")
@@ -54,13 +54,13 @@ func run(args []string) int {
 		_, _ = os.Stdout.Write(data) // Exact embedded bytes, including the final LF.
 		return 0
 	}
-	if len(args) == 1 && args[0] == "--dsl-signatures" {
+	if len(args) == 1 && args[0] == "--lmcode-signatures" {
 		for _, signature := range host.Registry.Signatures() {
 			fmt.Fprintln(os.Stdout, signature)
 		}
 		return 0
 	}
-	if len(args) != 2 || args[0] != "--dsl" {
+	if len(args) != 2 || args[0] != "--lmcode" {
 		return cliUsage()
 	}
 
