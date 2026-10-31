@@ -31,3 +31,4 @@ step(concat(compiler_command(), ["--no-preflight", "examples/rule-entries.lms", 
 step(concat(compiler_command(), ["--no-preflight", "examples/text-template.lms", path_join(Directory, "build/lmcode-go-sample") ]));
 step([python, "sample-suite/check-invocations.py", path_join(Directory, "build/lmcode-go-sample")]);
 step([python, "scripts/mutate-invocations.py", path_join(Directory, "build/lmcode-go-sample")]);
+step([python, "scripts/test-dry-mode.py", path_join(Directory, "build/lmcode-go-sample")]);
