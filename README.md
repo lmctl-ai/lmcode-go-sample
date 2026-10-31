@@ -8,11 +8,10 @@ schema bytes from the pinned suite.
 
 ## Prerequisites
 
-Use Go 1.26, Python 3, Node 24 and Bash. Build lmscript from mono main
-**177e38ca or later** and set `LMSCRIPT_BIN` to its `lmscript/bin/lmscript`.
-Published npm compiler 0.2.448 lacks `out=`; source builds may report 0.2.38,
-so source SHA and successful corpus reproduction establish capability.
-Run `./test.sh` with that compiler. No global install is required.
+Use Go 1.26, Python 3, Node 24 and Bash. Build lmscript from current mono
+main with opaque program and builder support, then set `LMSCRIPT_BIN` to its
+`lmscript/bin/lmscript`. Run `./test.sh` with that compiler. No global install
+is required.
 
 
 ## Write a host in ten steps
@@ -123,48 +122,38 @@ Every main push builds with CGO_ENABLED=0 and tests on Linux x64/arm64, macOS x6
 
 ## Text templates
 
-[examples/text-template.lms](examples/text-template.lms) renders ordinary text from a nested context with indexed lists, loops and boolean conditions. The standard `template_render(string, Json) -> string` function performs one pass; inserted values stay literal. Compile it with `$LMSCRIPT_BIN --no-preflight examples/text-template.lms build/text-template.dslb`, then run the sample host with `--lmcode build/text-template.dslb`.
+[examples/text-template.lms](examples/text-template.lms) builds an opaque lmcode
+program that renders ordinary text from nested JSON, indexed lists, loops and
+boolean conditions. `template_render(string, Json) -> string` performs one pass;
+inserted values stay literal. The example calls `run_lmcode` with this host and
+checks the returned envelope. The shared 123-case corpus covers template success
+and error cases. See the [portable template contract](https://github.com/lmctl-ai/lmcode-cpp/blob/main/std/template.md).
 
-The lmscript-driven suite runs 123 cases, including template success/error cases. See the [portable template contract](https://github.com/lmctl-ai/lmcode-cpp/blob/main/std/template.md).
+## Invocation adapter
 
-## Return protocol
+Each host process constructs one host context and accepts ordered flag/file pairs:
+`--lmcode FILE`, `--first FILE`, or `--last FILE`. Role flags affect execution
+order while result slots retain command-line add order. The same shop, ledger,
+registry, and domain handles serve all submitted programs in that process.
 
-One invocation owns a `lmcode.ResultSink`, configured with
-`Registry.SetResultSink` before the body and retained across selected entries.
-The sink is separate from per-region collection arenas. After dispatch and
-negative-balance validation, the CLI keeps its existing shop diagnostic and calls
-`lmcode.WriteResultFrame`. Unset produces null. Load, body, entry and application
-errors return before framing; entry HALT values remain independent of `$return`.
+A single program returns one terminal envelope. Multiple programs return one
+builder envelope with independent results in add order and a required `parts`
+count. Failures return one failure envelope without partial results. Shop output
+remains a tagged `host_summary` diagnostic before the frame; entry traces and
+application validation keep their existing behavior. The SDK's invocation
+collector owns one result sink per program across body and selected entry calls.
 
-### Program
+Public scripts construct and execute programs through `run_lmcode`; they do not
+name bytecode files. The rule and text-template examples use this path. The real
+integration control also checks repeated builder runs, two programs sharing one
+ledger, duplicate program slots, a one-slot builder versus a single list result,
+entry results, part failures, and global application failures.
 
-For a source file in `examples/`:
-
-```lmscript
-program = _lmcode_ schema="../sample-suite/sample.dsl.json" out=ARGV[0];
-$return.name = "shop";
-$return.total = shop.total().amount();
-end _lmcode_
-```
-
-### Expected result
-
-```text
-{"ok": true, "result": {"balance": 0, "entries": 0, "note": "", "entries_called": 0}}
-LMCODE_RETURN_BEGIN
-{"name":"shop","total":750}
-LMCODE_RETURN_END
-```
-
-### Validation
-
-The full gate includes ten shared Python/Node frame controls and actual compiled
-host faults from `scripts/test-return-controls.py`. Removing the frame or resetting
-the sink inside entry dispatch must fail canonical payload expectations. A compile
-failure, stderr or wrong exit is not accepted as a caught mutant. See
-[durable notes](durable-memory/index.md) for ownership and pin discipline.
-
-The host loads lmcode bytecode (DSLB v6).
+The normal `./test.sh` gate verifies the SDK and suite locks, all 123 byte/exit
+cases, bytecode reproduction, runner refusals, reusable examples, exact terminal
+frames, and compiled mutation controls. The invocation mutation driver requires a
+passing baseline build and proves shared-state reset, stale bare frames, duplicate
+and missing parts, and lost role argv are caught as assertion failures.
 
 ## Historical literal names
 
