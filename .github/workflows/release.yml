@@ -41,7 +41,7 @@ jobs:
         run: npm install -g @lmctl-ai/lmctl
       - name: Build and test
         run: |
-          lmscript --no-preflight test.lms
+          lmscript test.lms
           [[ "$(build/lmcode-go-sample --version | tr -d '\r')" == "lmcode-go-sample $SAMPLE_VERSION" ]]
           mkdir -p dist
           cp 'build/lmcode-go-sample${{ matrix.ext }}' 'dist/lmcode-go-sample-${{ matrix.label }}${{ matrix.ext }}'
